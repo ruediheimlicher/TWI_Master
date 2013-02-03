@@ -6,7 +6,7 @@
  volatile uint8_t						spistatus=0;
  
 #define TIMER0_STARTWERT					0x80
-#define SPI_BUFSIZE							32
+#define SPI_BUFSIZE							48
 
 /*
 

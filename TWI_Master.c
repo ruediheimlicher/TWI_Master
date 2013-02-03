@@ -2465,7 +2465,7 @@ wieder adressierbar.
                         lcd_gotoxy(16, 1);
                         lcd_puts("   \0");
                         
-                        RTC_erfolg = RTC_Abrufen();
+                        uint8_t RTC_erfolg = RTC_Abrufen();
                         if (RTC_erfolg)                           // Fehler, aussteigen
                         {
                            SchreibStatus=0;
