@@ -696,6 +696,8 @@ wert &= 0x03;
 return wert;
 }
 
+
+
 void TagZeigen(uint8_t Daten[], uint8_t Tag)
 {
 	char* wochentag[] = {"MO","DI","MI","DO","FR","SA","SO"};

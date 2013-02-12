@@ -171,6 +171,7 @@ static char SolarString[48];
 
 
 
+
 // defines fuer Alarm
 #define TIEFKUEHLALARM		3
 #define WASSERALARMKELLER	4
@@ -227,8 +228,15 @@ volatile uint8_t  DCF77_counter =0; // Anzahl gueltige Datumspakete in Folge
 #define START_BYTE_DELAY	12		// Timerwert fuer Start-Byte
 #define BYTE_DELAY			12		// Timerwert fuer Data-Byte
 
+
+// defines fuer PWM
+#define PWM_CODEBIT        0     //Es folgt ein TWI-Paket mit den Positionsdaten fuer den PWM. Diese werden in den Array Servoposition geladen
+#define PWM_SCHALTERBIT    1     // Byte 7 enthaelt Schalterposition, die eingestellt werden soll
+#define PWM_POSITIONBIT    2     // Byte 7 enthaelt Impulslaenge fuer PWM
+
+
 uint8_t Raum_Thema=0x00;			//	Bit 4-7: Thema		Bit 0-3: Raum
-uint8_t Objekt_Wochentag=0;		//	Bit 4-7: Objekt		Bit 0-3: Wochentag
+uint8_t Objekt_Wochentag=0;		//	Bit 4-7: Objekt	Bit 0-3: Wochentag
 uint8_t Stunde_Minute=0;
 uint8_t Menu_Ebene=0;
 
@@ -308,8 +316,7 @@ void tempbis99(uint16_t temperatur,char*tempbuffer)
 }
 
 void tempAbMinus20(uint16_t temperatur,char*tempbuffer)
-{
-	
+{	
 	char buffer[8]={};
 	int16_t temp=(temperatur)*5;
 	temp -=200;
@@ -430,15 +437,13 @@ volatile uint8_t EstrichRXdaten[buffer_size];
 volatile uint8_t EstrichTXdaten[buffer_size];
 
 
-
-
-	static volatile uint8_t min=0;
-	static volatile  uint8_t std=0;
-	static volatile  uint8_t tag=0;
+static volatile uint8_t min=0;
+static volatile  uint8_t std=0;
+static volatile  uint8_t tag=0;
 	
-	static volatile uint8_t oldmin=0;
-	static volatile  uint8_t oldstd=0;
-	static volatile  uint8_t oldtag=0;
+static volatile uint8_t oldmin=0;
+static volatile  uint8_t oldstd=0;
+static volatile  uint8_t oldtag=0;
 
 
 uint16_t			Brennerzeit=0;
@@ -2199,8 +2204,7 @@ wieder adressierbar.
 							lcd_puthex(EEPROMTXdaten[3]);
 							
                      uint8_t pwmwriteerfolg=0;
-                     pwmstatus |= (1<<(hbyte/2)); // raum ist hbyte/2
-                  
+                     pwmstatus |= (1<<(hbyte/2)); // raum ist hbyte/2                  
                      
                   }
                }break;
@@ -2281,10 +2285,10 @@ wieder adressierbar.
                         {
                            RTC_erfolg = RTC_Abrufen();
                            err_gotoxy(4,0);
-                           err_puts("RTC1\0");
-                           err_putc(' ');
+                           err_puts("R1\0");
+                           //err_putc(' ');
                            err_puthex(RTC_erfolg);
-                           err_putc(' ');
+                           //err_putc(' ');
                            err_puthex(versuche);
                            versuche++;
                         }
@@ -2302,7 +2306,7 @@ wieder adressierbar.
                            //err_putc('!');
                            
                            outbuffer[6] = RTC_erfolg;
-                           break;							// aktuelle Schlaufe verlassen
+                           //break;							// aktuelle Schlaufe verlassen
                            
                         }
                         else
@@ -2898,6 +2902,50 @@ wieder adressierbar.
 										spistatus |= (1<<TWI_ERR_BIT);
 										EEPROM_Err |= (1<<HEIZUNG);
 									}
+                           
+                           /*
+                            Byte 6 lesen
+                            Kann code enthalten, der das Verhalten des Slavesteuert.
+                            PWM_CODEBIT gesetzt:
+                            Es folgt ein TWI-Paket mit den Positionsdaten fuer den PWM
+                            Diese werden in den Array Servoposition geladen
+                            PWM_SCHALTERBIT gesetzt:
+                            Byte 7 enthaelt Schalterposition, die eingestellt werden soll
+                            PWM_POSITIONBIT gesetzt:
+                            Byte 7 enthaelt Impulslaenge fuer PWM
+                            
+                            */
+                           
+                           /*
+                            PWM lesen
+                            */
+ 									uint8_t tagblock3[buffer_size];
+									uint8_t obj3erfolg=WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, tagblock3, HEIZUNG, 3, 0);
+									//OSZIAHI;
+									delay_ms(1);
+                          
+                           if (obj3erfolg==0) // EEPROM erfolgreich gelesen
+									{
+										err_gotoxy(0,1);
+										err_puts("         \0");
+										err_gotoxy(0,1);
+										err_puts("PWM:\0");
+                              uint8_t pwmcode = tagblock3[0];
+										err_puthex(pwmcode);
+                              pwmcode = tagblock3[1];
+                              err_puthex(pwmcode);
+                              pwmcode = tagblock3[2];
+                              err_puthex(pwmcode);
+                              
+                           }
+                           else
+                           {
+                              
+                           }
+                           
+                           /*
+                            end PWM
+                            */
 									
 									// end Objekt 2
 									//err_gotoxy(0,8);
@@ -3194,8 +3242,38 @@ wieder adressierbar.
 										twi_Reply_count0++;
 									}
 									txbuffer[0]=0;
-									
-									SchreibStatus &= ~(1<< WERKSTATT);
+#pragma mark PWM
+                           /*
+                            PWM lesen
+                            */
+ 									uint8_t tagblock3[buffer_size];
+									uint8_t obj3erfolg=WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, tagblock3, HEIZUNG, 3, 0);
+									//OSZIAHI;
+									delay_ms(1);
+                           
+                           if (obj3erfolg==0) // EEPROM erfolgreich gelesen
+									{
+										err_gotoxy(10,0);
+										err_puts("         \0");
+										err_gotoxy(10,0);
+										err_puts("PWM:\0");
+                              uint8_t pwmcode = tagblock3[0];
+										err_puthex(pwmcode);
+                              pwmcode = tagblock3[1];
+                              err_puthex(pwmcode);
+                              pwmcode = tagblock3[2];
+                              err_puthex(pwmcode);
+                              
+                              
+                           }
+                           else
+                           {
+                              
+                           }
+
+                           
+                           
+                        SchreibStatus &= ~(1<< WERKSTATT);
 								}
 								
 								if (LeseStatus & (1<< WERKSTATT))	//lesen von Werkstatt
@@ -4052,6 +4130,35 @@ wieder adressierbar.
 									}
 									/*
 									 */
+                           /*
+                            PWM lesen
+                            */
+ 									uint8_t tagblock3[buffer_size];
+									uint8_t obj3erfolg=WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, tagblock3, HEIZUNG, 3, 0);
+									//OSZIAHI;
+									delay_ms(1);
+                           
+                           if (obj3erfolg==0) // EEPROM erfolgreich gelesen
+									{
+										err_gotoxy(0,1);
+										err_puts("         \0");
+										err_gotoxy(0,1);
+										err_puts("PWM:\0");
+                              uint8_t pwmcode = tagblock3[0];
+										err_puthex(pwmcode);
+                              pwmcode = tagblock3[1];
+                              err_puthex(pwmcode);
+                              pwmcode = tagblock3[2];
+                              err_puthex(pwmcode);
+                              
+                           }
+                           else
+                           {
+                              
+                           }
+
+                           
+                           
 									SchreibStatus &= ~(1<< OG2);
 								}	
 								
