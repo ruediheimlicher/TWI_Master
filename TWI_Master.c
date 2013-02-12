@@ -3819,7 +3819,40 @@ wieder adressierbar.
 									}
 									
 									
+                           
+									// Radiator lesen
+                           
+									wdt_reset();
+									erfolg=WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, LaborTagblock, LABOR, 1, Zeit.wochentag);
+									wdt_reset();
+									if (erfolg==0)
+									{
+										Stundencode=Tagplanwert(LaborTagblock, Zeit.stunde);
+										switch (Zeit.minute/30)
+										{
+											case 0: // erste halbe Stunde
+											{
+												
+												LaborTXdaten[1]=(Stundencode >=2); //Werte 2, 3: Brenner auf FULL Wert 0: Brenner RED/OFF
+												
+											}break;
+												
+											case 1: // zweite halbe Stunde
+											{
+												LaborTXdaten[1]=((Stundencode ==1)||(Stundencode==3)); //Werte 1, 3: Brenner auf FULL Wert 0: Brenner RED/OFF
+											}break;
+										}//switch
+										
+									}//erfolg
+									else
+									{
+										EEPROM_Err |= (1<<LABOR);
+                              spistatus |= (1<<TWI_ERR_BIT);
+									}
 									
+									// end Radiator lesen
+									
+
 									
 									
 									/*
