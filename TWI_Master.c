@@ -86,8 +86,8 @@ static volatile		uint8_t aktuelleDatenbreite=8;
 static volatile		uint8_t Testposition=0;;
 static volatile		uint8_t alteposition=0;
 
-static volatile uint8_t Write_Device;
-static volatile uint8_t Read_Device;
+static volatile      uint8_t Write_Device;
+static volatile      uint8_t Read_Device;
 
 
 // TWI-Fehlercodes
