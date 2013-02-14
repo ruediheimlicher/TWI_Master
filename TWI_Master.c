@@ -3157,53 +3157,16 @@ wieder adressierbar.
 									}
 									
 									// Objekt 1: Ofen
-									
+									txbuffer[1]=0;
 									erfolg = WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, Werkstatttagblock, WERKSTATT, 1, Zeit.wochentag);
 									//err_puthex(erfolg);
 									wdt_reset();
 									if (erfolg==0)
 									{
-										Stundencode=Tagplanwert(Werkstatttagblock, Zeit.stunde);
-										//err_puts(" c\0");
-										//err_puthex(Stundencode);
-										switch (Zeit.minute/30)
-										{
-											case 0: // erste halbe Stunde
-											{
-												if (Stundencode >=2)	//	Werte 2, 3: Brenner auf FULL Wert 0: Brenner RED/OFF
-												{
-													txbuffer[0] |= (1<< 1); // Bit 1 setzen
-												}
-												else
-												{
-													txbuffer[0] &= ~(1<< 1); // Bit 1 zuruecksetzen
-												}
-											}break;
-												
-											case 1: // zweite halbe Stunde
-											{
-												
-												if ((Stundencode ==1)||(Stundencode==3))//Werte 1, 3: Brenner auf FULL Wert 0: Brenner RED/OFF
-												{
-													txbuffer[0] |= (1<< 1); // Bit 1 setzen
-												}
-												else
-												{
-													txbuffer[0] &= ~(1<< 1); // Bit 1 zuruecksetzen
-												}
-												
-											}break;
-										}//switch
-										
-										// Test
-										
-										// txbuffer[0]= Zeit.minute % 2; // ON in ungeraden Minuten
-										
-										// End Test
-										//err_gotoxy(5,1);
-										//err_putint1(txbuffer[1]);
-										//err_puthex(Stundencode);
-										//err_putint1(1);
+										int OfenStundencode=Tagplanwert(Werkstatttagblock, Zeit.stunde);
+                              OfenStundencode &= 0x03;	// Bit 0 und 1 filtern fuer TXdaten[1]
+
+                              txbuffer[1]= OfenStundencode;
 									}//erfolg
 									else
 									{
@@ -3217,23 +3180,14 @@ wieder adressierbar.
 										EEPROM_Err |= (1<<WERKSTATT);
                               spistatus |= (1<<TWI_ERR_BIT);
 									}
-									
-									
 									// end Objekt 1						
-									//err_clr_part(0,0,10);
-									//err_puts("Hz wr\0");
+
 									wdt_reset();
 									twi_Call_count0++;
 									erfolg=SlaveSchreiben(WERKSTATT_ADRESSE);
 									wdt_reset();
 									if (erfolg)
 									{
-										//err_gotoxy(5,1);
-										//err_puts("Y\0");
-										
-										//err_clr_part(1,9,19);
-										//err_puts("w Hz err\0");
-										//err_puthex(erfolg);					
 										Write_Err |= (1<<WERKSTATT);
                               spistatus |= (1<<TWI_ERR_BIT);
 									}
@@ -3242,6 +3196,7 @@ wieder adressierbar.
 										twi_Reply_count0++;
 									}
 									txbuffer[0]=0;
+                           txbuffer[1]=0;
 #pragma mark PWM
                            /*
                             PWM lesen
@@ -3611,20 +3566,10 @@ wieder adressierbar.
 									}//erfolg
 									else
 									{
-										//err_clr_part(1,9,19);
-										//err_gotoxy(13,1);
-										//err_puts("X\0");
-										//err_puts("wl L er\0");
-										//err_puthex(erfolg);
-										//delay_ms(800);
 										EEPROM_Err |= (1<<WOZI);
                               spistatus |= (1<<TWI_ERR_BIT);
 									}
 									
-									
-									
-									//err_clr_part(0,0,10);
-									//err_puts("LB wr\0");
 									wdt_reset();
 									twi_Call_count0++;
 									
@@ -3637,17 +3582,7 @@ wieder adressierbar.
 									{
 										int RadiatorStundencode=Tagplanwert(tagblock1, Zeit.stunde);
 										
-										//outbuffer[30] |= RadiatorStundencode; // 9.4.11
-										
-										//err_gotoxy(10,1);
-										//err_puts("        \0");
-										//err_gotoxy(12,1);
-										//err_puts("Ra\0");
-										//err_puthex(RadiatorStundencode);
-										RadiatorStundencode &= 0x03;	// Bit 0 und 1 filtern fuer WoZiTXdaten[1]
-										
-										//err_putc(' ');
-										//err_puthex(RadiatorStundencode);
+                              RadiatorStundencode &= 0x03;	// Bit 0 und 1 filtern fuer WoZiTXdaten[1]
 										WoZiTXdaten[1] = RadiatorStundencode;
 										
 									}
@@ -3659,7 +3594,6 @@ wieder adressierbar.
 									
 									//end Schreiben Objekt 1
 									
-									
 									uint8_t wozierfolg=0;
 									wozierfolg=SlavedatenSchreiben(WOZI_ADRESSE,  WoZiTXdaten);
 									
@@ -3667,12 +3601,6 @@ wieder adressierbar.
 									//WoZiTXdaten[4]=45;
 									if (wozierfolg)
 									{
-										//err_gotoxy(13,1);
-										//err_puts("Y\0");
-										//err_clr_part(1,9,19);
-										//err_puts("w Lb err\0");
-										//err_puthex(laborerfolg);
-										//delay_ms(800);
 										Write_Err |= (1<<WOZI);
                               spistatus |= (1<<TWI_ERR_BIT);
 									}
@@ -3688,23 +3616,12 @@ wieder adressierbar.
 								if (LeseStatus & (1<< WOZI))	//lesen von Wozi
 								{
 									delay_ms(2);
-									//						err_gotoxy(12,1);
-									//						err_puts("L\0");
-									//uint8_t laborerfolg=SlaveLesen(LABOR_ADRESSE);
-									//err_clr_part(0,0,10);
-									//err_puts("LB rd\0");
 									wdt_reset();
 									twi_Call_count0++;
 									uint8_t wozierfolg=SlavedatenLesen(WOZI_ADRESSE, WoZiRXdaten);
 									wdt_reset();
 									if (wozierfolg)
 									{
-										//err_gotoxy(14,1);
-										//err_puts("Z\0");
-										//err_clr_part(1,9,19);
-										//err_puts("r Lb err\0");
-										//err_puthex(laborerfolg);
-										//delay_ms(800);
 										Read_Err |= (1<<WOZI);
                               spistatus |= (1<<TWI_ERR_BIT);
 									}
@@ -3713,10 +3630,6 @@ wieder adressierbar.
 										twi_Reply_count0++;
 										uint8_t pos=0x00;
 										pos=(PINC & 0x30)>>4; // Bit 4, 5
-										//pos >>4;
-										//err_gotoxy(7,1);
-										//err_puthex(pos);
-										//delay_ms(40);
 										switch (pos)
 										{
 											case 0:
@@ -3736,17 +3649,6 @@ wieder adressierbar.
 												break;
 												
 										}//switch pos
-										
-										//err_gotoxy(0,1);
-										//err_putc('T');
-										//err_puthex(WoZiRXdaten[0]);
-										//err_puthex(WoZiRXdaten[1]);
-										//err_puthex(WoZiRXdaten[2]);
-										//err_puthex(WoZiRXdaten[3]);
-										//err_puthex(WoZiRXdaten[4]);
-										//err_puthex(WoZiRXdaten[5]);
-										//err_puthex(WoZiRXdaten[6]);
-										//err_puthex(WoZiRXdaten[7]);
 										//		WebTxDaten[7]= WoZiRXdaten[1];	// Innentemperatur
 										outbuffer[7]= WoZiRXdaten[1];		// Innentemperatur
 									}
@@ -3782,6 +3684,8 @@ wieder adressierbar.
 									if (erfolg==0)
 									{
 										Stundencode=Tagplanwert(LaborTagblock, Zeit.stunde);
+                              
+                              
 										switch (Zeit.minute/30)
 										{
 											case 0: // erste halbe Stunde
@@ -3827,21 +3731,9 @@ wieder adressierbar.
 									wdt_reset();
 									if (erfolg==0)
 									{
-										Stundencode=Tagplanwert(LaborTagblock, Zeit.stunde);
-										switch (Zeit.minute/30)
-										{
-											case 0: // erste halbe Stunde
-											{
-												
-												LaborTXdaten[1]=(Stundencode >=2); //Werte 2, 3: Brenner auf FULL Wert 0: Brenner RED/OFF
-												
-											}break;
-												
-											case 1: // zweite halbe Stunde
-											{
-												LaborTXdaten[1]=((Stundencode ==1)||(Stundencode==3)); //Werte 1, 3: Brenner auf FULL Wert 0: Brenner RED/OFF
-											}break;
-										}//switch
+										int RadiatorStundencode=Tagplanwert(LaborTagblock, Zeit.stunde);
+                              RadiatorStundencode &= 0x03;	// Bit 0 und 1 filtern fuer TXdaten[1]
+                              LaborTXdaten[1] = RadiatorStundencode;
 										
 									}//erfolg
 									else
