@@ -1797,7 +1797,7 @@ wieder adressierbar.
 				out_lbdaten=0;
 				for (i=0;i<SPI_BUFSIZE;i++)
 				{
-					outbuffer[i]=0;
+	//				outbuffer[i]=0;
 				}
 				
 				/*
@@ -1932,11 +1932,12 @@ wieder adressierbar.
 						
 						
 					}break;
-						
+#pragma mark STATUSTASK						
 					case STATUSTASK:	// B1: in_hbdaten enthaelt Status
 					{
 						//Statustask abfragen, bei Status 0 TWI deaktivieren: Keine Stoerungen duch SPI-Aufrufe des Timers
 						
+                  outbuffer[32] = STATUSTASK;  // Task fuer vga
 						lcd_clr_line(1);
 						lcd_gotoxy(0,1);
 						lcd_puts("iS \0");
@@ -1948,7 +1949,7 @@ wieder adressierbar.
 						lcd_puthex(in_hbdaten);
 						lcd_puthex(in_lbdaten);
 						lcd_puts("         \0");
-						
+						//out_startdaten = STATUSCONFIRMTASK;
 						if (in_hbdaten == 0x01)
 						{
 							BUS_Status |=  (1<<TWI_CONTROLBIT);		// TWI ON	
@@ -1956,7 +1957,7 @@ wieder adressierbar.
 							out_hbdaten = 1;
 							out_lbdaten = 1;
 							outbuffer[1]=1; // Status an Webserver bestaetigen
-							
+							outbuffer[33]=1; // Status fuer vga
 							testCounterON++;
 							//BUS_Status &= ~(1<<WEB_CONTROLBIT);		// WEB OFF
 						
@@ -1973,7 +1974,7 @@ wieder adressierbar.
 							out_lbdaten = 0;
 
 							outbuffer[0]=0;	 // Status an Webserver bestaetigen
-							
+							outbuffer[33]=0;  // Status fuer vga
 							testCounterOFF++;
 							//BUS_Status |=  (1<<WEB_CONTROLBIT);		// WEB  ON
 						}
@@ -2001,7 +2002,7 @@ wieder adressierbar.
 						in_lbdaten=0;
 					}break;
 						
-						
+#pragma mark EEPROMREADTASK						
 					case EEPROMREADTASK: // B8
 					{
 						// Auftrag vom Webserver, die Daten im EEPROM an hb, lb zu lesen 
@@ -2017,7 +2018,7 @@ wieder adressierbar.
 						readerfolg = EEPROMTagLesen(0xA0, (void*)EEPROMTXdaten, hbyte, lbyte);
 						if (readerfolg==0)
 						{
-							
+							outbuffer[32] = EEPROMREADTASK;  // Task fuer vga
 							//TCNT0 =0x00;
 							//SIGNAL_Count=0;
 							
@@ -2046,13 +2047,22 @@ wieder adressierbar.
 							out_startdaten=EEPROMREPORTTASK; // B4
 							out_lbdaten=lbyte;
 							out_hbdaten=hbyte;
-							
+
+                     // Kontrollausgabe fuer vga
+                     
+                     outbuffer[33] = lbyte;
+                     outbuffer[34] = hbyte;
+
 							//err_gotoxy(6,1);
 							
 							// EEPROM-Daten in outbuffer schreiben
 							for(i=0;i<8;i++)
 							{
 								outbuffer[i]=EEPROMTXdaten[i];
+                        outbuffer[36+i] = EEPROMTXdaten[i];
+
+                        // Kontrollausgabe
+                        
 							}
 							
 							//delay_ms(1000);
@@ -2070,6 +2080,7 @@ wieder adressierbar.
 						}
 						else
 						{
+                     outbuffer[32] = ERRTASK;  // Task fuer vga
 							// SPI senden verhindern
 							spistatus |= (1<<TWI_ERR_BIT);
 							
@@ -2088,8 +2099,10 @@ wieder adressierbar.
 						
 						
 					}break;
+                  
+#pragma mark EEPROMWRITETASK
 						
-					case EEPROMWRITETASK:
+					case EEPROMWRITETASK: // B7
 					{
 						/* +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++  */
 						// Daten ins EEPROM schreiben
@@ -2103,14 +2116,15 @@ wieder adressierbar.
 						
                   // Kontrollausgabe
                   
-                  outbuffer[33] = 0x3A;
-                  outbuffer[34] = lbyte;
-                  outbuffer[35] = hbyte;
+                  outbuffer[32] = EEPROMWRITETASK; // B7
+                  outbuffer[33] = in_lbdaten;
+                  outbuffer[34] = in_hbdaten;
                   
 						uint8_t i=0;
 						for(i=0;i<8;i++)
 						{
 							EEPROMTXdaten[i]=inbuffer[i];
+                     // Kontrollausgabe
                      outbuffer[36+i] = inbuffer[i];
                      
 							//			err_gotoxy(3,1);
@@ -2159,7 +2173,8 @@ wieder adressierbar.
 							
 							out_startdaten= EEPROMCONFIRMTASK;
 							outbuffer[0]=EEPROMCONFIRMTASK;
-							
+                     
+							outbuffer[44]=EEPROMCONFIRMTASK; // Kontrolle fuer vga
 							// SPI senden veranlassen
 							BUS_Status |= (1<<SPI_SENDBIT);
 							
@@ -2170,6 +2185,7 @@ wieder adressierbar.
 						}
 						else
 						{
+                     outbuffer[32]=ERRTASK; // Kontrolle fuer vga
 							// SPI senden verhindern
 							spistatus |= (1<<TWI_ERR_BIT);
 
@@ -2938,16 +2954,16 @@ wieder adressierbar.
                           
                            if (obj3erfolg==0) // EEPROM erfolgreich gelesen
 									{
-										err_gotoxy(0,1);
-										err_puts("         \0");
-										err_gotoxy(0,1);
-										err_puts("PWM:\0");
+										//err_gotoxy(0,1);
+										//err_puts("         \0");
+										//err_gotoxy(0,1);
+										//err_puts("PWM:\0");
                               uint8_t pwmcode = tagblock3[0];
-										err_puthex(pwmcode);
+										//err_puthex(pwmcode);
                               pwmcode = tagblock3[1];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               pwmcode = tagblock3[2];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               
                            }
                            else
@@ -3220,16 +3236,16 @@ wieder adressierbar.
                            
                            if (obj3erfolg==0) // EEPROM erfolgreich gelesen
 									{
-										err_gotoxy(10,0);
-										err_puts("         \0");
-										err_gotoxy(10,0);
-										err_puts("PWM:\0");
+										//err_gotoxy(10,0);
+										//err_puts("         \0");
+										//err_gotoxy(10,0);
+										//err_puts("PWM:\0");
                               uint8_t pwmcode = tagblock3[0];
-										err_puthex(pwmcode);
+										//err_puthex(pwmcode);
                               pwmcode = tagblock3[1];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               pwmcode = tagblock3[2];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               
                               
                            }
@@ -4059,16 +4075,16 @@ wieder adressierbar.
                            
                            if (obj3erfolg==0) // EEPROM erfolgreich gelesen
 									{
-										err_gotoxy(0,1);
-										err_puts("         \0");
-										err_gotoxy(0,1);
-										err_puts("PWM:\0");
+										//err_gotoxy(0,1);
+										//err_puts("         \0");
+										//err_gotoxy(0,1);
+										//err_puts("PWM:\0");
                               uint8_t pwmcode = tagblock3[0];
-										err_puthex(pwmcode);
+										//err_puthex(pwmcode);
                               pwmcode = tagblock3[1];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               pwmcode = tagblock3[2];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               
                            }
                            else
