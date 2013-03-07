@@ -131,7 +131,7 @@ static volatile uint8_t						startbitpos=0;
 
 
 
-#define SPI_PULSAE_DELAY			70 // delay in ns
+#define SPI_PULSAE_DELAY		70 // delay in ns
 //#define DATENBREITE			8	// Anzahl Bytes in einer Serie
 
 

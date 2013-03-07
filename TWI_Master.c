@@ -1882,6 +1882,12 @@ wieder adressierbar.
 	
 		#pragma mark Webserver-Tasks
 		
+      /* *****************************************************************/
+      
+      /* *** SPI Daten auswerten *****************************************/
+      
+      /* *****************************************************************/
+      
 		if (spistatus & (1<<SPI_SHIFT_IN_OK_BIT))	// Shift-Bit ist nach 'neu PASSIVE' gesetzt, Datentausch ist erfolgt und OK
 		{
 			spistatus &= ~(1<<TWI_ERR_BIT);	// Bit fuer Fehler zuruecksetzen
@@ -1960,7 +1966,7 @@ wieder adressierbar.
 							BUS_Status &= ~(1<<TWI_CONTROLBIT);		// TWI OFF
 						
 							// Bestaetigung fuer Webserver
-							out_startdaten= STATUSCONFIRMTASK; // B2
+							out_startdaten= STATUSCONFIRMTASK; // B2  // an Webserver melden, dass TWI OFF ist
 							
 							setTWI_Status_LED(0);
 							out_hbdaten = 0;
@@ -1998,8 +2004,6 @@ wieder adressierbar.
 						
 					case EEPROMREADTASK: // B8
 					{
-						//				TCCR0B =0;
-						//				timer0off();
 						// Auftrag vom Webserver, die Daten im EEPROM an hb, lb zu lesen 
 						// und in der naechsten Runde im spi_buffer an den Webserver zurueckzuschicken
 												
@@ -2097,10 +2101,17 @@ wieder adressierbar.
 						lbyte=in_lbdaten;
 						hbyte=in_hbdaten;
 						
+                  // Kontrollausgabe
+                  outbuffer[33] = 0x3A;
+                  outbuffer[34] = lbyte;
+                  outbuffer[35] = hbyte;
+                  
 						uint8_t i=0;
 						for(i=0;i<8;i++)
 						{
 							EEPROMTXdaten[i]=inbuffer[i];
+                     outbuffer[36+i] = inbuffer[i];
+                     
 							//			err_gotoxy(3,1);
 							// err_puthex(EEPROMTXdaten[i]);
 							//			err_putc(' ');
@@ -3521,14 +3532,8 @@ wieder adressierbar.
 									uint8_t WoziTagblock[buffer_size];
 									uint8_t Stundencode=0;
 									WoZiTXdaten[0]=0;
-									//err_clr_line(1);
-									//err_gotoxy(0,1);
-									//err_puts("WD:\0");
-									//err_putint1(Zeit.wochentag);
 									
 									// WoZi-Tagplan lesen
-									//err_clr_part(0,0,10);
-									//err_puts("WT L rd\0");
 									wdt_reset();
 									
 									// Lampe lesen
@@ -3575,7 +3580,7 @@ wieder adressierbar.
 									
 									//begin Schreiben Objekt 1
 									// Code fuer Objekt 1 lesen: Radiator
-									
+									WoZiTXdaten[1] = 0;
 									uint8_t tagblock1[buffer_size];
 									uint8_t obj1erfolg=WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, tagblock1, WOZI, 1, Zeit.wochentag);
 									if (obj1erfolg==0) // EEPROM erfolgreich gelesen
@@ -3670,15 +3675,11 @@ wieder adressierbar.
 									uint8_t Stundencode=0;
 									LaborTXdaten[0]=0;
 									
-									//err_clr_line(1);
-									//err_gotoxy(0,1);
-									//err_puts("WD:\0");
-									//err_putint1(Zeit.wochentag);
-									
 									// Labor-Tagplan lesen
 									//err_clr_part(0,0,10);
 									//err_puts("WT L rd\0");
 									wdt_reset();
+                           
 									uint8_t erfolg=WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, LaborTagblock, LABOR, 0, Zeit.wochentag);
 									wdt_reset();
 									if (erfolg==0)
@@ -3712,20 +3713,12 @@ wieder adressierbar.
 									}//erfolg
 									else
 									{
-										//err_clr_part(1,9,19);
-										//err_gotoxy(13,1);
-										//err_puts("X\0");
-										//err_puts("wl L er\0");
-										//err_puthex(erfolg);
-										//delay_ms(800);
 										EEPROM_Err |= (1<<LABOR);
                               spistatus |= (1<<TWI_ERR_BIT);
 									}
-									
-									
                            
 									// Radiator lesen
-                           
+                           LaborTXdaten[1]=0;
 									wdt_reset();
 									erfolg=WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, LaborTagblock, LABOR, 1, Zeit.wochentag);
 									wdt_reset();
@@ -4637,14 +4630,15 @@ wieder adressierbar.
 			
 			
 			
-			
+		/*
 			Tastenwert=0;
 			initADC(tastatur_kanal);
 			//err_gotoxy(10,1);
 			//err_puts("TR \0");
 			
 			Tastenwert=(uint8_t)(readKanal(tastatur_kanal)>>2);
-			
+			*/
+         Tastenwert=0;
 			//err_puthex(Tastenwert);
 			
 			//			closeADC();
