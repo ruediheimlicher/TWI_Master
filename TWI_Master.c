@@ -2102,6 +2102,7 @@ wieder adressierbar.
 						hbyte=in_hbdaten;
 						
                   // Kontrollausgabe
+                  
                   outbuffer[33] = 0x3A;
                   outbuffer[34] = lbyte;
                   outbuffer[35] = hbyte;
