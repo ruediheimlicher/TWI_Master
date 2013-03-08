@@ -1837,7 +1837,7 @@ wieder adressierbar.
 				in_hbdaten=0;
 				for (j=0;j<SPI_BUFSIZE;j++)
 				{
-					inbuffer[j]=0;
+					//inbuffer[j]=0;
 				}
 				
 				spistatus |=(1<<ACTIVE_BIT); // Bit 0 setzen: neue Datenserie
@@ -1964,6 +1964,10 @@ wieder adressierbar.
 						}
 						else if (in_hbdaten == 0x00)
 						{
+                     /* *****************/
+                     
+                     // Fuehrt zu seinem Datentausch mit Master, daher in vga nicht angezeigt.
+                     // Schaltet nur den Takt fuer den Master-Aufruf durch den Webserver aus.
 							BUS_Status &= ~(1<<TWI_CONTROLBIT);		// TWI OFF
 						
 							// Bestaetigung fuer Webserver
@@ -1979,6 +1983,11 @@ wieder adressierbar.
 							//BUS_Status |=  (1<<WEB_CONTROLBIT);		// WEB  ON
 						}
 						
+                  for(i=36;i<40;i++)
+                  {
+                     outbuffer[i] = i;
+                  }
+
 						err_gotoxy(0,0);
 						err_puts("oS \0");
 						
@@ -2059,11 +2068,15 @@ wieder adressierbar.
 							for(i=0;i<8;i++)
 							{
 								outbuffer[i]=EEPROMTXdaten[i];
-                        outbuffer[36+i] = EEPROMTXdaten[i];
-
+                        
                         // Kontrollausgabe
                         
 							}
+                     for(i=40;i<44;i++)
+                     {
+                        outbuffer[i] = i;
+                     }
+                     
 							
 							//delay_ms(1000);
 							aktuelleDatenbreite=eeprom_buffer_size;
@@ -2125,7 +2138,7 @@ wieder adressierbar.
 						{
 							EEPROMTXdaten[i]=inbuffer[i];
                      // Kontrollausgabe
-                     outbuffer[36+i] = inbuffer[i];
+                     //outbuffer[36+i] = inbuffer[i];
                      
 							//			err_gotoxy(3,1);
 							// err_puthex(EEPROMTXdaten[i]);
@@ -2133,6 +2146,11 @@ wieder adressierbar.
 							//delay_ms(2);
 						}
 						
+                  for(i=44;i<48;i++)
+                  {
+                     //outbuffer[i] = i;
+                  }
+                  
 						err_gotoxy(0,1);
 						err_puts("wE \0");
 						
@@ -2155,9 +2173,6 @@ wieder adressierbar.
 						// hbyte, lbyte: Adresse im EEPROM, geschickt vom Webserver
 						
 						eepromerfolg=EEPROMTagSchreiben(0xA0,(void*)EEPROMTXdaten,hbyte ,lbyte);
-						//err_gotoxy(19,0);
-						//err_puts("erf\0");
-						//err_puthex(eepromerfolg);
 						
 						// erledigt
 						
@@ -2173,6 +2188,11 @@ wieder adressierbar.
 							
 							out_startdaten= EEPROMCONFIRMTASK;
 							outbuffer[0]=EEPROMCONFIRMTASK;
+                     
+                     for(i=40;i<44;i++)
+                     {
+                        outbuffer[i] = i;
+                     }
                      
 							outbuffer[44]=EEPROMCONFIRMTASK; // Kontrolle fuer vga
 							// SPI senden veranlassen
@@ -2272,17 +2292,10 @@ wieder adressierbar.
 						Read_Device=0;
 						Write_Device=0;
 						
-						//err_gotoxy(5,1);
-						//Zaehler fuer TWI-Loop
-						//err_puthex(loopCounterTWI++);
 						lcd_gotoxy(15,0);
 //						lcd_puts("U\0");
 						lcd_putc(' ');
 						OSZIBLO;
-						//err_gotoxy(0,0);
-
-						//err_puts("U\0");
-                  
                   // ++++++++++++++++++++++++++++++++
                   // TEST
                   // ++++++++++++++++++++++++++++++++
@@ -4230,7 +4243,13 @@ wieder adressierbar.
 								}
 								
 							} // DCF77-erfolg==0
-							
+                     
+                     //Kontrolle outbuffer DATATASK
+                     for(i=44;i<48;i++)
+                     {
+                        outbuffer[i] = i;
+                     }
+
 							//	Kontrolle: Labor schreiben: Schalter ein-aus nach jeder Minute
 							//if (DCF77daten[0]!=LaborDaten[8])//letzter Minutenwert war anders
 							{
