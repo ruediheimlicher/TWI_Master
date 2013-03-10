@@ -385,15 +385,7 @@ volatile uint8_t EEPROMTXdaten[eeprom_buffer_size];
 // Buffer fuer den Output-Code des Pakets
 volatile uint8_t EEPROMTXStartdaten;
 
-/*Der Buffer fuer die Solar-Daten des Webservers.*/
-//volatile uint8_t SolarTxDaten[eeprom_buffer_size];
-// Buffer fuer den Solar-Code des Pakets
-//volatile uint8_t SolarTxStartDaten;
 
-/*Der Buffer fuer die Output-Daten des EEPROMS.*/
-//volatile uint8_t EEPROMTXdaten[eeprom_buffer_size];
-// Buffer fuer den Output-Code des Pakets
-//volatile uint8_t EEPROMTXStartdaten;
 
 /*Der Buffer fuer die Input-Daten der Heizung.*/
 volatile uint8_t HeizungRXdaten[buffer_size];
@@ -1948,10 +1940,11 @@ wieder adressierbar.
 						lcd_puthex(in_hbdaten);
 						lcd_puthex(in_lbdaten);
 						lcd_puts("         \0");
-						
-						if (in_hbdaten == 0x01)
+                  
+                  
+						if (in_hbdaten == 0x01)// TWI solll wieder eingeschaltet werden
 						{
-							BUS_Status |=  (1<<TWI_CONTROLBIT);		// TWI ON	
+							BUS_Status |=  (1<<TWI_CONTROLBIT);		// TWI ON
 							setTWI_Status_LED(1);
 							out_hbdaten = 1;
 							out_lbdaten = 1;
@@ -2005,9 +1998,15 @@ wieder adressierbar.
 					case EEPROMREADTASK: // B8
 					{
 						// Auftrag vom Webserver, die Daten im EEPROM an hb, lb zu lesen 
-						// und in der naechsten Runde im spi_buffer an den Webserver zurueckzuschicken
+						// und  im spi_buffer an den Webserver zurueckzuschicken
 												
-						lbyte=in_lbdaten;
+						// Experiment: Controlbit loeschen, um Lesen von SR zu verhindern. Wird mit B1 wieder gesetzt
+                  
+                  BUS_Status &= ~(1<<TWI_CONTROLBIT);		// TWI OFF
+						
+                  
+                  
+                  lbyte=in_lbdaten;
 						hbyte=in_hbdaten;
 						
 						uint8_t readerfolg =0;
@@ -2054,7 +2053,12 @@ wieder adressierbar.
 							{
 								outbuffer[i]=EEPROMTXdaten[i];
 							}
-							
+
+                     for(i=16;i<8;i++)
+							{
+								outbuffer[i]=EEPROMTXdaten[i];
+							}
+
 							//delay_ms(1000);
 							aktuelleDatenbreite=eeprom_buffer_size;
 							
@@ -2078,6 +2082,11 @@ wieder adressierbar.
 							//err_puts("E-\0");
 							//err_puthex(readerfolg);
 							
+                     for(i=0;i<8;i++)
+							{
+								outbuffer[i]=13;
+							}
+
 						}
 						
 						//	BUS_Status |=(1<<TWI_CONTROLBIT);		// TWI wieder ON				
@@ -2097,7 +2106,12 @@ wieder adressierbar.
 						
 						// Auftrag vom Webserver, die Daten im in_buffer an Adresse hb, lb ins EEPROM zu schreiben
 						
-						EEPROMTXStartdaten=EEPROMWRITETASK; // B7
+						// Experiment: Controlbit loeschen, um Lesen von SR zu verhindern. Wird mit B1 wieder gesetzt
+                  
+                  BUS_Status &= ~(1<<TWI_CONTROLBIT);		// TWI OFF
+                  
+                  
+                  EEPROMTXStartdaten=EEPROMWRITETASK; // B7
 						lbyte=in_lbdaten;
 						hbyte=in_hbdaten;
 						
@@ -2139,6 +2153,8 @@ wieder adressierbar.
 						// EEPROMTXdaten: Array mit den Daten fuer das EEPROM, vom Webserver 
 						// hbyte, lbyte: Adresse im EEPROM, geschickt vom Webserver
 						
+                  //Daten ins EEPROM schreiben
+                  
 						eepromerfolg=EEPROMTagSchreiben(0xA0,(void*)EEPROMTXdaten,hbyte ,lbyte);
 						//err_gotoxy(19,0);
 						//err_puts("erf\0");
@@ -2150,13 +2166,14 @@ wieder adressierbar.
 						
 						// Quittung senden: Daten fuer naechstes Paket von SPI laden
 						
+                                                         // Im Moment nicht verwendet. Webserver fragt nicht nach
 						
 						if (eepromerfolg==0) // alles ok
 						{
 							err_gotoxy(19,1);
 							err_putc('<');
 							
-							out_startdaten= EEPROMCONFIRMTASK;
+							out_startdaten= EEPROMCONFIRMTASK; // B5
 							outbuffer[0]=EEPROMCONFIRMTASK;
 							
 							// SPI senden veranlassen
@@ -2428,7 +2445,6 @@ wieder adressierbar.
                                     oldtag=DCF77daten[2];
                                     
                                  }
-                                 
                                  
                               } //if (oldstd==DCF77daten[1])&&(oldtag=DCF77daten[2])
                               else // fehler
@@ -2937,16 +2953,17 @@ wieder adressierbar.
                           
                            if (obj3erfolg==0) // EEPROM erfolgreich gelesen
 									{
-										err_gotoxy(0,1);
-										err_puts("         \0");
-										err_gotoxy(0,1);
-										err_puts("PWM:\0");
+                              
+										//err_gotoxy(0,1);
+										//err_puts("         \0");
+										//err_gotoxy(0,1);
+										//err_puts("PWM:\0");
                               uint8_t pwmcode = tagblock3[0];
-										err_puthex(pwmcode);
+										//err_puthex(pwmcode);
                               pwmcode = tagblock3[1];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               pwmcode = tagblock3[2];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               
                            }
                            else
@@ -3219,16 +3236,16 @@ wieder adressierbar.
                            
                            if (obj3erfolg==0) // EEPROM erfolgreich gelesen
 									{
-										err_gotoxy(10,0);
-										err_puts("         \0");
-										err_gotoxy(10,0);
-										err_puts("PWM:\0");
+										//err_gotoxy(10,0);
+										//err_puts("         \0");
+										//err_gotoxy(10,0);
+										//err_puts("PWM:\0");
                               uint8_t pwmcode = tagblock3[0];
-										err_puthex(pwmcode);
+										//err_puthex(pwmcode);
                               pwmcode = tagblock3[1];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               pwmcode = tagblock3[2];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               
                               
                            }
@@ -4058,16 +4075,16 @@ wieder adressierbar.
                            
                            if (obj3erfolg==0) // EEPROM erfolgreich gelesen
 									{
-										err_gotoxy(0,1);
-										err_puts("         \0");
-										err_gotoxy(0,1);
-										err_puts("PWM:\0");
+										//err_gotoxy(0,1);
+										//err_puts("         \0");
+										//err_gotoxy(0,1);
+										//err_puts("PWM:\0");
                               uint8_t pwmcode = tagblock3[0];
-										err_puthex(pwmcode);
+										//err_puthex(pwmcode);
                               pwmcode = tagblock3[1];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               pwmcode = tagblock3[2];
-                              err_puthex(pwmcode);
+                              //err_puthex(pwmcode);
                               
                            }
                            else
@@ -4290,6 +4307,17 @@ wieder adressierbar.
 								outbuffer[FEHLERBYTE]=Read_Err;		// Byte 24
 								outbuffer[FEHLERBYTE+1]=Write_Err;
 								outbuffer[FEHLERBYTE+2]=EEPROM_Err;
+                        
+                        for (int i=44;i<48;i++)
+                        {
+                           outbuffer[i]= i;
+                        }
+                        
+                        for (int i=0;i<8;i++)
+                        {
+                           outbuffer[i+36]= EEPROMTXdaten[i];
+                        }
+
 								//	Warten auf nŠchsten Timerevent
 								SchreibStatus=0;
 								LeseStatus=0;	
@@ -4303,7 +4331,7 @@ wieder adressierbar.
 								
 								
 								i2c_stop();
-								//TWI zutuecksetzen;
+								//TWI zuruecksetzen;
 								
 								TWCR =0;
 								
@@ -4407,8 +4435,8 @@ wieder adressierbar.
 				{
 					// Fehlermeldung an Webserver schicken
 					out_startdaten=ERRTASK;	// A0
-					out_lbdaten=0;
-					out_hbdaten=0;
+					out_lbdaten=13;
+					out_hbdaten=13;
                
                outbuffer[0]=Read_Err;
                outbuffer[1]=Write_Err;
