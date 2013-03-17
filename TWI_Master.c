@@ -3193,7 +3193,17 @@ wieder adressierbar.
 									{
 										int OfenStundencode=Tagplanwert(Werkstatttagblock, Zeit.stunde);
                               OfenStundencode &= 0x03;	// Bit 0 und 1 filtern fuer TXdaten[1]
-
+                              
+                              /*
+                              if (OfenStundencode) // Stundenwert ist >0, Ofen ein
+                              {
+                                 txbuffer[0] |= (1<< 1); // Bit 1 setzen
+                              }
+                              else
+                              {
+                                 txbuffer[0] &= ~(1<< 1); // Bit 1 zuruecksetzen
+                              }
+                               */
                               txbuffer[1]= OfenStundencode;
 									}//erfolg
 									else
