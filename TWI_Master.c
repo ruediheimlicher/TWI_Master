@@ -173,9 +173,9 @@ static char SolarString[48];
 
 
 // defines fuer Alarm
-#define TIEFKUEHLALARM		3
-#define WASSERALARMKELLER	4
-#define WASSERALARMESTRICH	1
+#define TIEFKUEHLALARM        3
+#define WASSERALARMKELLER     4
+#define WASSERALARMESTRICH    1
 
 // defines fuer spistatus
 

@@ -59,7 +59,7 @@ void displayRaum(const uint8_t RaumThema, const uint8_t ObjektWochentag, const u
 	//	RaumTable: Namen der Räume
 	strcpy_P(titelbuffer, (PGM_P)pgm_read_word(&(RaumTable[RaumThema>>4])));//Bit 7 - 4
 	
-	//	Raum anzeigen:
+   //	Raum anzeigen:
 	
 	//	lcd_gotoxy(0,0);
 	//	lcd_puts(titelbuffer);
