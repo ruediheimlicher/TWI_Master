@@ -176,6 +176,7 @@ static char SolarString[48];
 #define TIEFKUEHLALARM		3
 #define WASSERALARMKELLER	4
 #define WASSERALARMESTRICH	1
+
 // defines fuer spistatus
 
 
@@ -476,6 +477,7 @@ volatile uint8_t SIGNAL_Count=0; // Anzahl Interrupts bis TWI abfragen
 char* wochentagstring[] = {"MO","DI","MI","DO","FR","SA","SO"};
 
 uint8_t AnzeigeWochentag=0; //
+
 
 char Heizung0[]  PROGMEM ="Status\0";
 char Heizung1[]  PROGMEM ="Plan\0";
@@ -3102,7 +3104,6 @@ wieder adressierbar.
 									outbuffer[4] = HeizungRXdaten[2];				//	Aussen
 									outbuffer[5] = 0;
 									outbuffer[5] |= HeizungRXdaten[3];				//	Brennerstatus Bit 2
-									
 									outbuffer[5] |= HeizungStundencode;				// Bit 4, 5 gefiltert aus Tagplanwert von Brenner und Mode
 									outbuffer[5] |= RinneStundencode;				// Bit 6, 7 gefiltert aus Tagplanwert von Rinne
 									
