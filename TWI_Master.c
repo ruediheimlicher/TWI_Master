@@ -4233,7 +4233,7 @@ wieder adressierbar.
 									for (i=0 ; i<8; i++) 
 									{
 										//		outbuffer[i]=EstrichRXdaten[i];			// Fuer Test: Daten ab Byte 0 von outbuffer
-										outbuffer[estrich  +i]=EstrichRXdaten[i]; // Daten ab Byte 'estrich' von outbuffer Byte 9
+										outbuffer[estrich +i]=EstrichRXdaten[i]; // Daten ab Byte 'estrich' von outbuffer Byte 9
 									}
 									
 									
