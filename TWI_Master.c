@@ -1941,14 +1941,9 @@ wieder adressierbar.
 						lcd_puthex(in_hbdaten);
 						lcd_puthex(in_lbdaten);
 						lcd_puts("         \0");
-<<<<<<< HEAD
 						
-						if (in_hbdaten == 0x01)// TWI solll wieder eingeschaltet werden
-=======
-                  
                   
 						if (in_hbdaten == 0x01)// TWI solll wieder eingeschaltet werden
->>>>>>> 150516_neue_Hardware
 						{
 							BUS_Status |=  (1<<TWI_CONTROLBIT);		// TWI ON
 							setTWI_Status_LED(1);
@@ -2076,21 +2071,12 @@ wieder adressierbar.
                         // Kontrollausgabe
                         
 							}
-<<<<<<< HEAD
-                     for(i=40;i<44;i++)
-                     {
-                        outbuffer[i] = i;
-                     }
-                     
-							
-=======
 
                      for(i=16;i<8;i++)
 							{
 								outbuffer[i]=EEPROMTXdaten[i];
 							}
 
->>>>>>> 150516_neue_Hardware
 							//delay_ms(1000);
 							aktuelleDatenbreite=eeprom_buffer_size;
 							
@@ -3027,10 +3013,6 @@ wieder adressierbar.
                           
                            if (obj3erfolg==0) // EEPROM erfolgreich gelesen
 									{
-<<<<<<< HEAD
-=======
-                              
->>>>>>> 150516_neue_Hardware
 										//err_gotoxy(0,1);
 										//err_puts("         \0");
 										//err_gotoxy(0,1);
