@@ -4416,7 +4416,6 @@ wieder adressierbar.
 								twi_Reply_count0=0;
 								
 								
-								
 								i2c_stop();
 								//TWI zuruecksetzen;
 								
