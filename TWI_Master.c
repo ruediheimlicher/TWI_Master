@@ -120,7 +120,7 @@ static char SolarString[48];
 //static char* sstr;
 
 
-#define test 0
+uint8_t test = 0;
 
 
 #define SCLPIN		0
@@ -771,7 +771,9 @@ void masterinit(void)
 	DDRB &= ~(1<<7); // Pin 7 von Port B als Eingang fuer Servotest 2
 	PORTB |= (1<<7); //HI
 	
-	
+   DDRB &= ~(1<<0); // Pin 0 von Port B als Eingang fuer test: 0 wenn testmodus
+   PORTB |= (1<<0); //HI
+
 	
 	
 	
@@ -1940,8 +1942,8 @@ wieder adressierbar.
 						lcd_puthex(in_lbdaten);
 						lcd_puts("         \0");
 <<<<<<< HEAD
-						//out_startdaten = STATUSCONFIRMTASK;
-						if (in_hbdaten == 0x01)
+						
+						if (in_hbdaten == 0x01)// TWI solll wieder eingeschaltet werden
 =======
                   
                   
@@ -2490,8 +2492,6 @@ wieder adressierbar.
                                     }
                                     
                                     
-                                    
-                                    
                                     lcd_putint1(DCF77_counter);
                                     oldmin=DCF77daten[0];
                                     if (DCF77_counter >= MIN_SYNC) // genuegende Anzahl korrekte Daten
@@ -2578,6 +2578,12 @@ wieder adressierbar.
                            outbuffer[6] = RTC_erfolg;
                            // aktuelle Schlaufe verlassen
                         }
+                        else
+                        {
+                           err_gotoxy(10,0);
+                           err_puts("RTC OK\0");
+                        }
+                        
                         
                         
                      }
