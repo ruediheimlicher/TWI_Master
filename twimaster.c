@@ -129,7 +129,7 @@ unsigned char i2c_start(unsigned char address)
 	// wait until transmission completed
 	while(!(TWCR & (1<<TWINT)) && whilecounter)
 	{
-	whilecounter--;
+      whilecounter--;
 	}
 	
 	if (whilecounter==0) // kein Erfolg

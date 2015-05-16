@@ -20,11 +20,6 @@ extern volatile uint8_t inbuffer[SPI_BUFSIZE];		// In-Buffer fuer die Daten vom 
 extern volatile uint8_t in_enddaten;					// Enddaten vom Master, Anzeige fuer vollstaendige Uebertragung
 */
 
-#define SPI_DATA_PORT				PORTD // Clock und Data
-#define SPI_DATA_PORTPIN			PIND	// Data lesen
-#define SPI_DATA_PORTDIR			DDRD	// Data RICHTUNG
-#define SPI_CLK_PIN				3
-#define SPI_DATA_IO_PIN			4
 
 
 
