@@ -11,3 +11,4 @@ IOWarrior
 *.o
 *.sym
 *.xcodeproj
+.dep
