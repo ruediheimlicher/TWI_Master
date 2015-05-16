@@ -24,7 +24,7 @@
 # include "lcd.c"
 # include "err.c"
 # include "adc.c"
-//# include "iow.c"
+
 # include "slaves.c"
 # include "display.c"
 #include "datum.c"
@@ -479,100 +479,100 @@ char* wochentagstring[] = {"MO","DI","MI","DO","FR","SA","SO"};
 uint8_t AnzeigeWochentag=0; //
 
 
-char Heizung0[]  PROGMEM ="Status\0";
-char Heizung1[]  PROGMEM ="Plan\0";
-char Heizung2[]  PROGMEM ="Tag\0";
-char Heizung3[]  PROGMEM ="Nacht\0";
-char Heizung4[]  PROGMEM ="Heizung 4\0";
-char Heizung5[]  PROGMEM ="Heizung 5\0";
-char Heizung6[]  PROGMEM ="Heizung 6\0";
-char Heizung7[]  PROGMEM ="Heizung 7\0";
-//PGM_P HeizungTable[] PROGMEM ={Heizung0, Heizung1, Heizung2, Heizung3, Heizung4, Heizung5, Heizung6, Heizung7};
+const char Heizung0[]  PROGMEM ="Status\0";
+const char Heizung1[]  PROGMEM ="Plan\0";
+const char Heizung2[]  PROGMEM ="Tag\0";
+const char Heizung3[]  PROGMEM ="Nacht\0";
+const char Heizung4[]  PROGMEM ="Heizung 4\0";
+const char Heizung5[]  PROGMEM ="Heizung 5\0";
+const char Heizung6[]  PROGMEM ="Heizung 6\0";
+const char Heizung7[]  PROGMEM ="Heizung 7\0";
+PGM_P const HeizungTable[] PROGMEM ={Heizung0, Heizung1, Heizung2, Heizung3, Heizung4, Heizung5, Heizung6, Heizung7};
 
-char Werkstatt0[] PROGMEM = "Status\0";
-char Werkstatt1[] PROGMEM = "Plan\0";
-char Werkstatt2[] PROGMEM = "WS 2\0";
-char Werkstatt3[] PROGMEM = "WS 3\0";
-char Werkstatt4[] PROGMEM = "WS 4\0";
-char Werkstatt5[] PROGMEM = "WS 5\0";
-char Werkstatt6[] PROGMEM = "WS 6\0";
-char Werkstatt7[] PROGMEM = "WS 7\0";
-//PGM_P WerkstattTable[] PROGMEM = {Werkstatt0, Werkstatt1, Werkstatt2, Werkstatt3, Werkstatt4, Werkstatt5, Werkstatt6, Werkstatt7};
-
-
-char WoZi0[] PROGMEM = "Status\0";
-char WoZi1[] PROGMEM = "Plan\0";
-char WoZi2[] PROGMEM = "WoZi 2\0";
-char WoZi3[] PROGMEM = "WoZi 3\0";
-char WoZi4[] PROGMEM = "WoZi 4\0";
-char WoZi5[] PROGMEM = "WoZi 5\0";
-char WoZi6[] PROGMEM = "WoZi 6\0";
-char WoZi7[] PROGMEM = "WoZi 7\0";
-//PGM_P WoZiTable[] PROGMEM = {WoZi0, WoZi1, WoZi2, WoZi3, WoZi4, WoZi5, WoZi6, WoZi7};
+const char Werkstatt0[] PROGMEM = "Status\0";
+const char Werkstatt1[] PROGMEM = "Plan\0";
+const char Werkstatt2[] PROGMEM = "WS 2\0";
+const char Werkstatt3[] PROGMEM = "WS 3\0";
+const char Werkstatt4[] PROGMEM = "WS 4\0";
+const char Werkstatt5[] PROGMEM = "WS 5\0";
+const char Werkstatt6[] PROGMEM = "WS 6\0";
+const char Werkstatt7[] PROGMEM = "WS 7\0";
+PGM_P const WerkstattTable[] PROGMEM = {Werkstatt0, Werkstatt1, Werkstatt2, Werkstatt3, Werkstatt4, Werkstatt5, Werkstatt6, Werkstatt7};
 
 
-char Buero0[] PROGMEM = "Status\0";
-char Buero1[] PROGMEM = "Plan\0";
-char Buero2[] PROGMEM = "Buero 2\0";
-char Buero3[] PROGMEM = "Buero 3\0";
-char Buero4[] PROGMEM = "Buero 4\0";
-char Buero5[] PROGMEM = "Buero 5\0";
-char Buero6[] PROGMEM = "Buero 6\0";
-char Buero7[] PROGMEM = "Buero 7\0";
-//PGM_P BueroTable[] PROGMEM = {Buero0, Buero1, Buero2, Buero3, Buero4, Buero5, Buero6, Buero7};
-
-char Labor0[] PROGMEM = "Status\0";
-char Labor1[] PROGMEM = "Plan\0";
-char Labor2[] PROGMEM = "Labor 2\0";
-char Labor3[] PROGMEM = "Labor 3\0";
-char Labor4[] PROGMEM = "Labor 4\0";
-char Labor5[] PROGMEM = "Labor 5\0";
-char Labor6[] PROGMEM = "Labor 6\0";
-char Labor7[] PROGMEM = "Labor 7\0";
-//PGM_P LaborTable[] PROGMEM = {Labor0, Labor1, Labor2, Labor3, Labor4, Labor5, Labor6, Labor7};
-
-char OG_10[] PROGMEM = "Status\0";
-char OG_11[] PROGMEM = "Plan\0";
-char OG_12[] PROGMEM = "OG_12\0";
-char OG_13[] PROGMEM = "OG_13\0";
-char OG_14[] PROGMEM = "OG_15\0";
-char OG_15[] PROGMEM = "OG_16\0";
-char OG_16[] PROGMEM = "OG_16\0";
-char OG_17[] PROGMEM = "OG_17\0";
-//PGM_P OG_1Table[] PROGMEM = {OG_10, OG_11, OG_12, OG_13, OG_14, OG_15, OG_16, OG_17};
-
-char OG_20[] PROGMEM = "Status\0";
-char OG_21[] PROGMEM = "Plan\0";
-char OG_22[] PROGMEM = "OG2 2\0";
-char OG_23[] PROGMEM = "OG2 3\0";
-char OG_24[] PROGMEM = "OG2 4\0";
-char OG_25[] PROGMEM = "OG2 5\0";
-char OG_26[] PROGMEM = "OG2 6\0";
-char OG_27[] PROGMEM = "OG2 7\0";
-//PGM_P OG_2Table[] PROGMEM = {OG_20, OG_21, OG_22, OG_23, OG_24, OG_25, OG_26, OG_27};
-
-char Estrich0[] PROGMEM = "Status\0";
-char Estrich1[] PROGMEM = "Plan\0";
-char Estrich2[] PROGMEM = "Estrich 2\0";
-char Estrich3[] PROGMEM = "Estrich 3\0";
-char Estrich4[] PROGMEM = "Estrich 4\0";
-char Estrich5[] PROGMEM = "Estrich 5\0";
-char Estrich6[] PROGMEM = "Estrich 6\0";
-char Estrich7[] PROGMEM = "Estrich 7\0";
-//PGM_P EstrichTable[] PROGMEM = {Estrich0, Estrich1, Estrich2, Estrich3, Estrich4, Estrich5, Estrich6, Estrich7};
+const char WoZi0[] PROGMEM = "Status\0";
+const char WoZi1[] PROGMEM = "Plan\0";
+const char WoZi2[] PROGMEM = "WoZi 2\0";
+const char WoZi3[] PROGMEM = "WoZi 3\0";
+const char WoZi4[] PROGMEM = "WoZi 4\0";
+const char WoZi5[] PROGMEM = "WoZi 5\0";
+const char WoZi6[] PROGMEM = "WoZi 6\0";
+const char WoZi7[] PROGMEM = "WoZi 7\0";
+//PGM_P  const WoZiTable[] PROGMEM = {WoZi0, WoZi1, WoZi2, WoZi3, WoZi4, WoZi5, WoZi6, WoZi7};
 
 
-char Raum0[] PROGMEM = "Heizung\0";
-char Raum1[] PROGMEM = "Werkstatt\0";
-char Raum2[] PROGMEM = "WoZi\0";
-char Raum3[] PROGMEM = "Buero\0";
-char Raum4[] PROGMEM = "Labor\0";
-char Raum5[] PROGMEM = "OG 1\0";
-char Raum6[] PROGMEM = "OG 2\0";
-char Raum7[] PROGMEM = "Estrich\0";
-PGM_P RaumTable[] PROGMEM = {Raum0, Raum1, Raum2, Raum3, Raum4, Raum5, Raum6, Raum7};
+const char Buero0[] PROGMEM = "Status\0";
+const char Buero1[] PROGMEM = "Plan\0";
+const char Buero2[] PROGMEM = "Buero 2\0";
+const char Buero3[] PROGMEM = "Buero 3\0";
+const char Buero4[] PROGMEM = "Buero 4\0";
+const char Buero5[] PROGMEM = "Buero 5\0";
+const char Buero6[] PROGMEM = "Buero 6\0";
+const char Buero7[] PROGMEM = "Buero 7\0";
+//PGM_P  const BueroTable[] PROGMEM = {Buero0, Buero1, Buero2, Buero3, Buero4, Buero5, Buero6, Buero7};
 
-PGM_P P_MenuTable[] PROGMEM = {Heizung0, Heizung1, Heizung2, Heizung3, Heizung4, Heizung5, Heizung6, Heizung7,
+const char Labor0[] PROGMEM = "Status\0";
+const char Labor1[] PROGMEM = "Plan\0";
+const char Labor2[] PROGMEM = "Labor 2\0";
+const char Labor3[] PROGMEM = "Labor 3\0";
+const char Labor4[] PROGMEM = "Labor 4\0";
+const char Labor5[] PROGMEM = "Labor 5\0";
+const char Labor6[] PROGMEM = "Labor 6\0";
+const char Labor7[] PROGMEM = "Labor 7\0";
+//PGM_P  const LaborTable[] PROGMEM = {Labor0, Labor1, Labor2, Labor3, Labor4, Labor5, Labor6, Labor7};
+
+const char OG_10[] PROGMEM = "Status\0";
+const char OG_11[] PROGMEM = "Plan\0";
+const char OG_12[] PROGMEM = "OG_12\0";
+const char OG_13[] PROGMEM = "OG_13\0";
+const char OG_14[] PROGMEM = "OG_15\0";
+const char OG_15[] PROGMEM = "OG_16\0";
+const char OG_16[] PROGMEM = "OG_16\0";
+const char OG_17[] PROGMEM = "OG_17\0";
+//PGM_P  const OG_1Table[] PROGMEM = {OG_10, OG_11, OG_12, OG_13, OG_14, OG_15, OG_16, OG_17};
+
+const char OG_20[] PROGMEM = "Status\0";
+const char OG_21[] PROGMEM = "Plan\0";
+const char OG_22[] PROGMEM = "OG2 2\0";
+const char OG_23[] PROGMEM = "OG2 3\0";
+const char OG_24[] PROGMEM = "OG2 4\0";
+const char OG_25[] PROGMEM = "OG2 5\0";
+const char OG_26[] PROGMEM = "OG2 6\0";
+const char OG_27[] PROGMEM = "OG2 7\0";
+//PGM_P  const OG_2Table[] PROGMEM = {OG_20, OG_21, OG_22, OG_23, OG_24, OG_25, OG_26, OG_27};
+
+const char Estrich0[] PROGMEM = "Status\0";
+const char Estrich1[] PROGMEM = "Plan\0";
+const char Estrich2[] PROGMEM = "Estrich 2\0";
+const char Estrich3[] PROGMEM = "Estrich 3\0";
+const char Estrich4[] PROGMEM = "Estrich 4\0";
+const char Estrich5[] PROGMEM = "Estrich 5\0";
+const char Estrich6[] PROGMEM = "Estrich 6\0";
+const char Estrich7[] PROGMEM = "Estrich 7\0";
+//PGM_P  const EstrichTable[] PROGMEM = {Estrich0, Estrich1, Estrich2, Estrich3, Estrich4, Estrich5, Estrich6, Estrich7};
+
+
+const char Raum0[] PROGMEM = "Heizung\0";
+const char Raum1[] PROGMEM = "Werkstatt\0";
+const char Raum2[] PROGMEM = "WoZi\0";
+const char Raum3[] PROGMEM = "Buero\0";
+const char Raum4[] PROGMEM = "Labor\0";
+const char Raum5[] PROGMEM = "OG 1\0";
+const char Raum6[] PROGMEM = "OG 2\0";
+const char Raum7[] PROGMEM = "Estrich\0";
+PGM_P const RaumTable[] PROGMEM = {Raum0, Raum1, Raum2, Raum3, Raum4, Raum5, Raum6, Raum7};
+
+PGM_P const P_MenuTable[] PROGMEM = {Heizung0, Heizung1, Heizung2, Heizung3, Heizung4, Heizung5, Heizung6, Heizung7,
 	Werkstatt0, Werkstatt1, Werkstatt2, Werkstatt3, Werkstatt4, Werkstatt5, Werkstatt6, Werkstatt7,
 	WoZi0, WoZi1, WoZi2, WoZi3, WoZi4, WoZi5, WoZi6, WoZi7,
 	Buero0, Buero1, Buero2, Buero3, Buero4, Buero5, Buero6, Buero7,
@@ -582,19 +582,16 @@ PGM_P P_MenuTable[] PROGMEM = {Heizung0, Heizung1, Heizung2, Heizung3, Heizung4,
 	Estrich0, Estrich1, Estrich2, Estrich3, Estrich4, Estrich5, Estrich6, Estrich7};
 
 
-char Titel[] PROGMEM = "HomeCentral\0";
-char Name[] PROGMEM = "Ruedi Heimlicher\0";
-char Adresse[] PROGMEM = "Falkenstrasse 20\0";
-char Ort[] PROGMEM = "8630 Rueti\0";
-PGM_P P_StartTable[] PROGMEM = {Titel, Name, Adresse, Ort};
+const char Titel[] PROGMEM = "HomeCentral\0";
+const char Name[] PROGMEM = "Ruedi Heimlicher\0";
+const char Adresse[] PROGMEM = "Falkenstrasse 20\0";
+const char Ort[] PROGMEM = "8630 Rueti\0";
+PGM_P const P_StartTable[] PROGMEM = {Titel, Name, Adresse, Ort};
 
 uint8_t EEMEM WDT_ErrCount;	// Akkumulierte WDT Restart Events
 uint8_t EEMEM TWI_ErrCount;	// Akkumulierte TWI Restart Events
 
 
-//volatile	uint8_t IN_PINS[4]={IOW_DATA0_IN_PIN,IOW_DATA1_IN_PIN,0,0};
-//volatile	uint8_t OUT_PINS[4]={IOW_DATA0_OUT_PIN,IOW_DATA1_OUT_PIN,0,0};
-volatile	uint8_t lastIOW_IN;
 
 #define HEIZUNG_BRENNER 0xF1
 #define HEIZUNG_BRENNER_EIN 0x01
@@ -1440,7 +1437,7 @@ int main (void)
 				res=rtc_write_Control(1);
 				
 				// stunde, minute, sekunde
-				res=rtc_write_Zeit(14,38,0);
+				res=rtc_write_Zeit(14,38,0);// uint8_t stunde, uint8_t minute, uint8_t sekunde
 				delay_ms(10);
 				/*
 				if (res)
@@ -1454,7 +1451,7 @@ int main (void)
 				}
 				*/
 				// Datum: 1 = Montag
-				res=rtc_write_Datum(6,23,4,11);
+				res=rtc_write_Datum(6,23,4,15);// uint8_t wochentag, uint8_t tagdesmonats, uint8_t monat, uint8_t jahr
 				delay_ms(10);
 				
 				if (res)
@@ -1886,7 +1883,6 @@ wieder adressierbar.
 		{
 			spistatus &= ~(1<<TWI_ERR_BIT);	// Bit fuer Fehler zuruecksetzen
 			BUS_Status &= ~(1<<SPI_SENDBIT);	// sendbit in BUS_status zuruecksetzen, wird gesetzt, 
-
 			{
 				if (test)
 				{
@@ -2291,6 +2287,28 @@ wieder adressierbar.
                   if (test)
                   {
                      uint8_t DCF77_erfolg = UhrAbrufen();
+                     
+                     
+                     /*
+                      DCF77daten[1] = 12; // stunde
+                      DCF77daten[0] = 17; // minute
+                      
+                      res=rtc_write_Zeit(DCF77daten[1], DCF77daten[0],0); // stunde, minute, sekunde
+                      
+                      
+                      
+                      DCF77daten[2] = 13; // TagDesMonats
+                      DCF77daten[3] = 10; // Monat
+                      DCF77daten[4] = 15; // Jahr
+                      DCF77daten[5] = 1; // Wochentag
+                      uhrstatus &= ~(1<<SYNC_READY);
+                      uhrstatus |= (1<<SYNC_OK);
+                      uhrstatus &= ~(1<<SYNC_NEW);                 // TWI soll jetzt Daten senden
+
+                      res=rtc_write_Datum(DCF77daten[5], DCF77daten[2], DCF77daten[3],DCF77daten[4]);//wochentag (1 = Montag), tagdesmonats, monat, jahr (2-stellig)
+
+                      
+                      */
                      err_gotoxy(0,0);
                      err_putint2(DCF77daten[1]);
                      err_putc(':');
@@ -2302,10 +2320,10 @@ wieder adressierbar.
 						else
                   {
                      
-#pragma mark Uhr  
+#pragma mark Uhr
                      //TWBR=48;
                      if (!(uhrstatus & (1<<SYNC_NULL)))     // Nach reset, rtc noch nicht abfragen
-
+                        
                      {
                         uint8_t versuche=0;
                         uint8_t RTC_erfolg=1;
@@ -2350,7 +2368,7 @@ wieder adressierbar.
                            
                         }
                      }
-                  
+                     
                      
                      lcd_gotoxy(16,0);
                      lcd_putc('+');
@@ -2426,6 +2444,15 @@ wieder adressierbar.
                                     lcd_putc('3');
                                     
                                     DCF77_counter++;
+                                    
+                                    if (test)
+                                    {
+                                       DCF77_counter = MIN_SYNC;
+                                    }
+                                    
+                                    
+                                    
+                                    
                                     lcd_putint1(DCF77_counter);
                                     oldmin=DCF77daten[0];
                                     if (DCF77_counter >= MIN_SYNC) // genuegende Anzahl korrekte Daten
@@ -2516,7 +2543,7 @@ wieder adressierbar.
                         
                      }
                      // Ende Synchronisation
-						} // if NOT test
+                  } // if NOT test
 						
                   // ++++++++++++++++++++++++++++++++
                   // End NOT TEST
@@ -3241,6 +3268,7 @@ wieder adressierbar.
                             PWM lesen
                             */
  									uint8_t tagblock3[buffer_size];
+                           // EEPROM_WOCHENPLAN_ADRESSE, tagblock, raum, objekt, Wochentag
 									uint8_t obj3erfolg=WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, tagblock3, HEIZUNG, 3, 0);
 									//OSZIAHI;
 									delay_ms(1);
@@ -4428,6 +4456,7 @@ wieder adressierbar.
 							OSZIAHI;
 							
 						}//	if ((SchreibStatus || LeseStatus))
+                  
 						
 					}break; // default: DATATASK
 						

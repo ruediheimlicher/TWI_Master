@@ -17,7 +17,7 @@ extern uint8_t DCF77daten[];
 
 //extern volatile uint8_t DCF77daten[];
 
-extern PGM_P P_MenuTable[];
+extern PGM_P const P_MenuTable[];
 extern volatile uint8_t HeizungRXdaten[];
 //extern   uint8_t DCF77daten[];
 extern  volatile uint8_t LaborRXdaten[];
@@ -26,7 +26,7 @@ extern  volatile uint8_t BueroRXdaten[];
 extern  volatile uint8_t BueroTXdaten[];
 extern  volatile uint8_t WerkstattRXdaten[];
 extern  volatile uint8_t WerkstattTXdaten[];
-extern PGM_P RaumTable[];
+extern PGM_P const RaumTable[];
 extern uint16_t Brennerzeit;
 //extern volatile uint8_t MenuEbene;
 //volatile uint8_t Raum_Thema;		//	Bit 4-7: Thema		Bit 0-3: Raum

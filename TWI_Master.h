@@ -141,5 +141,5 @@ uint8_t TagSchreiben(unsigned char ADRESSE, uint8_t Daten[], uint8_t Tag);
 void readADCSlave (unsigned char address);
 void readDCF77(unsigned char address);
 void readEstrichSlave (unsigned char address);
-void readIOW(void);
+
 uint8_t UhrAbrufen(void);
