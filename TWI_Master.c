@@ -1387,6 +1387,22 @@ int main (void)
 	uhrstatus |= (1<<SYNC_NULL); // Uhr undef, warten auf DCF77
 	
 	initOSZI();
+   
+   
+   if (PINB & (1<<0))
+   {
+      test=1;
+      err_gotoxy(8,1);
+      err_putc('R');
+      
+   }
+   else
+   {
+      err_gotoxy(8,1);
+      err_putc('T');
+      
+   }
+   
 	/******************************************************************/
 	
 	/*** Hauptschleife															***/
