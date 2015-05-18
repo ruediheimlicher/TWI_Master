@@ -120,7 +120,7 @@ static char SolarString[48];
 //static char* sstr;
 
 
-uint8_t test = 0;
+volatile uint8_t test = 0;
 
 
 #define SCLPIN		0
@@ -792,14 +792,14 @@ void masterinit(void)
 	//	DDRC &= ~(1<<DDC0);	//Pin 0 von PORT C als Eingang fuer TWI SCL
 	
 	
-	DDRB &= ~(1<<DDB0);	//Pin 0 von PORT B als Eingang fuer Taster 0
+	DDRB &= ~(1<<DDB0);	//Pin 0 von PORT B als Eingang fuer Taster 0 (Testeingang)
 	PORTB |= (1<<DDB0); //Pull-up
 	
 	DDRB &= ~(1<<DDB1);	//Pin 1 von PORT B als Eingang fuer Taster 1
 	PORTB |= (1<<DDB1); //Pull-up
 	
-	DDRC |= (1<<2);	//Pin 2 von PORT C als Ausgang fuer TWI-Anzeige
-	PORTC |= (1<<2); // ON
+	DDRC |= (1<<LOOPLEDPIN);	//Pin 2 von PORT C als Ausgang fuer TWI-Anzeige
+	PORTC |= (1<<LOOPLEDPIN); // ON
 	DDRC |= (1<<TWI_CONTROLPIN);	//Pin 3 von PORT C als Ausgang fuer TWI-Anzeige
 	PORTC |= (1<<TWI_CONTROLPIN); // ON
 	
@@ -1391,17 +1391,14 @@ int main (void)
    
    if (PINB & (1<<0))
    {
-      test=1;
-      err_gotoxy(8,1);
-      err_putc('R');
       
    }
    else
    {
-      err_gotoxy(8,1);
-      err_putc('T');
+      test=1;
       
    }
+   
    
 	/******************************************************************/
 	
@@ -1505,7 +1502,7 @@ int main (void)
 		}
 		
 		loopcount0++;
-		if (loopcount0 >= 0x00FF)
+		if (loopcount0 >= 0x0FFF)
 		{
 			LOOPLEDPINPORT ^=(1<<LOOPLEDPIN); // Blink-LED
 			
@@ -1528,10 +1525,15 @@ int main (void)
 				if (test) // Start der TWI-Routinen ohne Webserver
 				{
 					spistatus |= (1<<SPI_SHIFT_IN_OK_BIT);
-					err_gotoxy(18,0);
-					err_puts("T\0");
+					err_gotoxy(19,1);
+					err_puts('T');
 				
 				}
+            else
+            {
+               err_gotoxy(19,1);
+                err_putc('R');
+            }
 				//lcd_gotoxy(2,1);
 				//lcd_puts("Wechsel \0");
 				//lcd_puthex(loopcount1);
@@ -1551,18 +1553,18 @@ int main (void)
 		if (((startdelay==0)||(startdelay==STARTDELAY))&& (((!(PINC & (1<<SDAPIN))) && PINC & (1<<SCLPIN)) ) )// SDA ist LO und SCL ist HI (warten auf Ack)
 		{
 			err_gotoxy(15,1);
-			err_puts("ERR\0");
+			err_puts("AERR");
 
 			/*
 			
-1. TWI Modul am Master abschalten.
-2. Am Master SDA als Input und SCL als Output konfigurieren.
-3. SCL im TWI Takt so lange toggeln bis SDA wieder high ist
-4. TWI wieder initialisieren und weiter machen ...
+         1. TWI Modul am Master abschalten.
+         2. Am Master SDA als Input und SCL als Output konfigurieren.
+         3. SCL im TWI Takt so lange toggeln bis SDA wieder high ist
+         4. TWI wieder initialisieren und weiter machen ...
 
-Du mu§t also das HW-TWI abschalten und per SW-I2C einen SCL-Puls
-generieren und dann versuchen, Stop zu senden. Erst dann ist der Slave
-wieder adressierbar.
+         Du mu§t also das HW-TWI abschalten und per SW-I2C einen SCL-Puls
+         generieren und dann versuchen, Stop zu senden. Erst dann ist der Slave
+         wieder adressierbar.
 			*/
          
 			// Zaehlen, wieviele Runden der Fehler dauert
@@ -1751,7 +1753,10 @@ wieder adressierbar.
 					IncompleteCounter++;
                 spistatus &= ~(1<<SPI_SHIFT_IN_OK_BIT);
 				}
-				
+				if (test)
+            {
+               spistatus |= (1<<SPI_SHIFT_IN_OK_BIT);
+            }
 				//lcd_gotoxy(11, 1);							// Events zahelen
 				//lcd_puthex(OutCounter);
 				/*						
@@ -1898,6 +1903,8 @@ wieder adressierbar.
       /* *****************************************************************/
       
 		if (spistatus & (1<<SPI_SHIFT_IN_OK_BIT))	// Shift-Bit ist nach 'neu PASSIVE' gesetzt, Datentausch ist erfolgt und OK
+         
+                                                // oder test ist 1
 		{
 			spistatus &= ~(1<<TWI_ERR_BIT);	// Bit fuer Fehler zuruecksetzen
 			BUS_Status &= ~(1<<SPI_SENDBIT);	// sendbit in BUS_status zuruecksetzen, wird gesetzt, 
@@ -2379,7 +2386,7 @@ wieder adressierbar.
                            err_puts("R1\0");
                            //err_putc(' ');
                            err_puthex(RTC_erfolg);
-                           //err_putc(' ');
+                           err_putc(' ');
                            err_puthex(versuche);
                            versuche++;
                         }
@@ -2402,10 +2409,11 @@ wieder adressierbar.
                         }
                         else
                         {
-                           err_gotoxy(13,0);
+                           err_gotoxy(12,0);
                            err_putc(' ');
-                           err_putc(' ');
-                           err_putc(' ');
+                           err_putint2(DCF77daten[1]);
+                           err_putc(':');
+                           err_putint2(DCF77daten[0]);
                            err_gotoxy(19,0);
                            err_putc('+');
                            
@@ -2447,13 +2455,16 @@ wieder adressierbar.
                         uint8_t DCF77_erfolg = UhrAbrufen(); // DCF-Uhr abrufen
                         if (DCF77_erfolg) // Fehler
                         {
-                           lcd_gotoxy(16, 1);
+                           err_gotoxy(14, 1);
                            err_puts("DCF\0");
                            err_putc('!');
                            DCF77_counter=0; // zurueck auf Feld 1. Uhr hat einen Fehler, Synchronisation neu starten
                         }
                         else // Wert ist OK
                         {
+                           err_gotoxy(14, 1);
+                           err_puts("    \0");
+                           
                            lcd_gotoxy(16, 1);
                            lcd_putc('+');
                            lcd_putint2(DCF77daten[0]);         // Minuten
