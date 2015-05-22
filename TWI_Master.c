@@ -2079,6 +2079,7 @@ int main (void)
 							lcd_puthex(EEPROMTXdaten[1]);	
 							lcd_puthex(EEPROMTXdaten[2]);
 							lcd_puthex(EEPROMTXdaten[3]);
+                     
 							
 							lcd_gotoxy(19,3);
 							lcd_putc('>');
