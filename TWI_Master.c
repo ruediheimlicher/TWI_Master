@@ -1356,7 +1356,7 @@ int main (void)
 	uint8_t j;
 	for (j=0;j<SPI_BUFSIZE;j++)
 	{
-		outbuffer[j]=0;
+		outbuffer[j]=j+0x30;
 		inbuffer[j]=0;
 	}
    /*
@@ -1524,15 +1524,15 @@ int main (void)
             
 				if (test) // Start der TWI-Routinen ohne Webserver
 				{
-					spistatus |= (1<<SPI_SHIFT_IN_OK_BIT);
+		//			spistatus |= (1<<SPI_SHIFT_IN_OK_BIT);
 					err_gotoxy(19,1);
-					err_puts('T');
+					err_putc('T');
 				
 				}
             else
             {
                err_gotoxy(19,1);
-                err_putc('R');
+               err_putc('R');
             }
 				//lcd_gotoxy(2,1);
 				//lcd_puts("Wechsel \0");
@@ -1755,7 +1755,7 @@ int main (void)
 				}
 				if (test)
             {
-               spistatus |= (1<<SPI_SHIFT_IN_OK_BIT);
+        //       spistatus |= (1<<SPI_SHIFT_IN_OK_BIT);
             }
 				//lcd_gotoxy(11, 1);							// Events zahelen
 				//lcd_puthex(OutCounter);
@@ -1811,9 +1811,20 @@ int main (void)
 				out_lbdaten=0;
 				for (i=0;i<SPI_BUFSIZE;i++)
 				{
-	//				outbuffer[i]=0;
+               if (test)
+               {
+					outbuffer[i]=i+0x30;
+               }
+               else
+               {
+                  outbuffer[i]=0;
+               }
 				}
-				
+            //if (test)
+            {
+               outbuffer[46] = Zeit.stunde;
+               outbuffer[47] = Zeit.minute;
+            }
 				/*
 				lcd_gotoxy(0,0);				// Fehler zaehlen
 				lcd_puts("IC   \0");
@@ -2337,7 +2348,7 @@ int main (void)
                   if (test)
                   {
                      uint8_t DCF77_erfolg = UhrAbrufen();
-                     
+                     uhrstatus |= (1<<SYNC_READY);
                      
                      /*
                       DCF77daten[1] = 12; // stunde
@@ -2359,6 +2370,22 @@ int main (void)
 
                       
                       */
+                     
+                     uhrstatus &= ~(1<<SYNC_READY);
+                     uhrstatus |= (1<<SYNC_OK);
+                     uhrstatus &= ~(1<<SYNC_NEW);                 // TWI soll jetzt Daten senden
+                     
+                     lcd_gotoxy(0,1);
+                     lcd_puts("T:\0");
+                     {
+                        
+                        lcd_putint2(DCF77daten[1]);
+                        lcd_putc(':');
+                        lcd_putint2(DCF77daten[0]);
+                        lcd_putc(':');
+                        lcd_putint1(DCF77daten[5]-1); // Wochentag
+                     }
+
                      err_gotoxy(0,0);
                      err_putint2(DCF77daten[1]);
                      err_putc(':');
@@ -2366,6 +2393,21 @@ int main (void)
                      //err_putc(':');
                      //err_putint1(DCF77daten[5]-1);
                      
+                     for (i=0;i<SPI_BUFSIZE;i++)
+                     {
+                  
+                           outbuffer[i]=i+0x30;
+                        
+                       
+                     }
+                     //if (test)
+                     {
+                        outbuffer[46] = DCF77daten[1];
+                        outbuffer[47] = DCF77daten[0];
+                     }
+                     uint8_t res=rtc_write_Zeit(DCF77daten[1], DCF77daten[0],0); // stunde, minute, sekunde
+
+
                   }
 						else
                   {
@@ -2550,7 +2592,15 @@ int main (void)
                      if (uhrstatus & (1<<SYNC_READY)) // Uhr ist wieder bereit
                      {
                         uint8_t res=0;
-                        res=rtc_write_Zeit(DCF77daten[1], DCF77daten[0],0); // stunde, minute, sekunde
+                        if (test)
+                        {
+                           //res=rtc_write_Zeit(0, 0,0); // stunde, minute, sekunde
+                           res=rtc_write_Zeit(DCF77daten[1], DCF77daten[0],0); // stunde, minute, sekunde
+                        }
+                        else
+                        {
+                           res=rtc_write_Zeit(DCF77daten[1], DCF77daten[0],0); // stunde, minute, sekunde
+                        }
                         
                         res=rtc_write_Datum(DCF77daten[5], DCF77daten[2], DCF77daten[3],DCF77daten[4]);
                         uhrstatus &= ~(1<<SYNC_READY);
@@ -2662,7 +2712,7 @@ int main (void)
 							
 							
 							// Versuch 12.08: Verblassen des 2*20-LCD verhindern
-							//err_initialize(ERR_FUNCTION_8x2, ERR_CMD_ENTRY_INC, ERR_CMD_ON);
+						//err_initialize(ERR_FUNCTION_8x2, ERR_CMD_ENTRY_INC, ERR_CMD_ON);
 							
 							twi_Call_count0=0;
 							twi_Reply_count0=0;
@@ -2675,10 +2725,15 @@ int main (void)
 								out_lbdaten=0;
 								
 								uint8_t i=0;
-								for (i=0 ; i<SPI_BUFSIZE; i++) 
-								{
-									outbuffer[i]=0;
-								}
+                        if (test)
+                        {
+                           for (i=0 ; i<SPI_BUFSIZE-2; i++)
+                           {
+                              outbuffer[i]=i+0x2F;
+                           }
+                        }
+                        outbuffer[46] = DCF77daten[1];
+                        outbuffer[47] = DCF77daten[0];
 								//err_gotoxy(15,0);
 								//err_putc('U');
 								
@@ -2787,8 +2842,7 @@ int main (void)
 								} //Zeit vorwaertsstellen
 								wdt_reset();
 								// end Uhr lesen
-								
-								UhrLesen=0;
+ 								UhrLesen=0;
 								HeizungRXdaten[6]=0x00;
 								HeizungRXdaten[7]=0x00;
 #pragma mark Heizung					
@@ -4330,7 +4384,7 @@ int main (void)
                      //Kontrolle outbuffer DATATASK
                      for(i=44;i<48;i++)
                      {
-                        outbuffer[i] = i;
+                        //outbuffer[i] = i;
                      }
 
 							//	Kontrolle: Labor schreiben: Schalter ein-aus nach jeder Minute
@@ -4577,6 +4631,7 @@ int main (void)
 		wdt_reset();
 		
 		// TWI mit Taste toggeln
+      /* // Konflikt mit test-Eingang
 		if (!(PINB & (1<<PORTB0))) // Taste 0 TWI Ein/Aus
 		{
 			//err_gotoxy(12,0);
@@ -4605,7 +4660,7 @@ int main (void)
 					err_gotoxy(8,0);
 					err_puts("P0\0");
 					//err_putint(Tastencount);
-					err_putc(' ');
+					err_putc(':');
 					err_puthex(BUS_Status);
 					//err_putc('v');
 					
@@ -4640,7 +4695,7 @@ int main (void)
 			}//else
 			
 		}
-		
+		*/
 		wdt_reset();
 		
 		if (!(PINB & (1<<PB1))) // Taste 1
