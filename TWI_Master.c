@@ -1822,8 +1822,8 @@ int main (void)
 				}
             //if (test)
             {
-               outbuffer[46] = Zeit.stunde;
-               outbuffer[47] = Zeit.minute;
+              // outbuffer[46] = Zeit.stunde;
+              // outbuffer[47] = Zeit.minute;
             }
 				/*
 				lcd_gotoxy(0,0);				// Fehler zaehlen
@@ -1951,6 +1951,7 @@ int main (void)
 				//lcd_puthex(BUS_Status);
 				lcd_puthex(in_startdaten);
 				//delay_ms(100);
+            
 				switch (in_startdaten) // Daten vom Webserver, liegen am Anfang der Schleife bereit 
 				{
 					case NULLTASK: // B0
@@ -1984,6 +1985,7 @@ int main (void)
 							out_hbdaten = 1;
 							out_lbdaten = 1;
 							outbuffer[1]=1; // Status an Webserver bestaetigen
+                     outbuffer[32]=STATUSCONFIRMTASK;  // Task fuer vga
 							outbuffer[33]=1; // Status fuer vga
 							testCounterON++;
 							//BUS_Status &= ~(1<<WEB_CONTROLBIT);		// WEB OFF
@@ -1993,7 +1995,7 @@ int main (void)
 						{
                      /* *****************/
                      
-                     // Fuehrt zu seinem Datentausch mit Master, daher in vga nicht angezeigt.
+                     // Fuehrt zu keinem Datentausch mit Master, daher in vga nicht angezeigt.
                      // Schaltet nur den Takt fuer den Master-Aufruf durch den Webserver aus.
 							BUS_Status &= ~(1<<TWI_CONTROLBIT);		// TWI OFF
 						
@@ -2005,7 +2007,8 @@ int main (void)
 							out_lbdaten = 0;
 
 							outbuffer[0]=0;	 // Status an Webserver bestaetigen
-							outbuffer[33]=0;  // Status fuer vga
+							outbuffer[32]=STATUSCONFIRMTASK;  // Task fuer vga
+                     outbuffer[33]=0;  // Status fuer vga
 							testCounterOFF++;
 							//BUS_Status |=  (1<<WEB_CONTROLBIT);		// WEB  ON
 						}
@@ -2236,12 +2239,8 @@ int main (void)
 							out_startdaten= EEPROMCONFIRMTASK; // B5
 							outbuffer[0]=EEPROMCONFIRMTASK;
                      
-                     for(i=40;i<44;i++)
-                     {
-                        outbuffer[i] = i;
-                     }
                      
-							outbuffer[44]=EEPROMCONFIRMTASK; // Kontrolle fuer vga
+							outbuffer[32]=EEPROMCONFIRMTASK; // Kontrolle fuer vga
 							// SPI senden veranlassen
 							BUS_Status |= (1<<SPI_SENDBIT);
 							
@@ -2304,7 +2303,7 @@ int main (void)
                   }
                }break;
 						
-						
+#pragma mark case DATATASK
 					case DATATASK:
 						
 					//default:						// DATATASK
@@ -2403,8 +2402,8 @@ int main (void)
                      }
                      //if (test)
                      {
-                        outbuffer[46] = DCF77daten[1];
-                        outbuffer[47] = DCF77daten[0];
+                     //   outbuffer[46] = DCF77daten[1];
+                     //   outbuffer[47] = DCF77daten[0];
                      }
                      uint8_t res=rtc_write_Zeit(DCF77daten[1], DCF77daten[0],0); // stunde, minute, sekunde
 
@@ -2671,7 +2670,7 @@ int main (void)
 							SchreibStatus=0; 
 							LeseStatus=0;
 						}
-						
+
 						err_clr_line(1);
 						err_gotoxy(12,1);
 						err_putc('R');
@@ -2707,6 +2706,9 @@ int main (void)
 						if ((SchreibStatus || LeseStatus)&& (!(uhrstatus & (1<<SYNC_NEW))))		// Uhr nicht gerade am Synchronisieren
                      // && (twi_HI_count0 >= 0x02))//&&(TastaturCount==0))
 						{
+                     outbuffer[43] = SchreibStatus;
+                     outbuffer[44] = LeseStatus;
+
 							OSZIALO;
 							BUS_Status |= (1<<SPI_SENDBIT);
 							out_startdaten= DATATASK;//	C0: Daten sammeln fuer den Webserver
@@ -2730,9 +2732,10 @@ int main (void)
                         {
                            for (i=0 ; i<SPI_BUFSIZE-2; i++)
                            {
-                              outbuffer[i]=i+0x2F;
+                              //outbuffer[i]=i+0x2F;
                            }
                         }
+                        outbuffer[45] = DCF77daten[5];
                         outbuffer[46] = DCF77daten[1];
                         outbuffer[47] = DCF77daten[0];
 								//err_gotoxy(15,0);
@@ -2855,6 +2858,11 @@ int main (void)
 								OSZIALO;
 								uint8_t HeizungStundencode=0;
 								uint8_t RinneStundencode=0;
+                        if (test)
+                        {
+                           outbuffer[0] = DCF77daten[0];
+                        }
+
 								if (SchreibStatus & (1<< HEIZUNG))	//schreiben an Heizung
 								{
 									delay_ms(2);
@@ -2877,7 +2885,7 @@ int main (void)
 									
 									wdt_reset();
 									
-									// code fuer Objekt 0 aus EEPROM lesen, 8 bytes
+									// Objekt 0: code fuer aus EEPROM lesen, 8 bytes
 									
 									uint8_t erfolg=WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, tagblock, HEIZUNG, 0, Zeit.wochentag);
 									//OSZIAHI;
@@ -2910,8 +2918,7 @@ int main (void)
 										//Echo = HeizungStundencode;
 										
 										HeizungStundencode &= 0x03; // Bit 0 und 1 filtern
-										outbuffer[27] = HeizungStundencode;
-										
+																				
 										
 										//err_puts(" c\0");
 										//err_puthex(Stundencode);
@@ -2943,8 +2950,10 @@ int main (void)
 										//err_puthex(txbuffer[0]);
 										
 										// An Heizung wird nur der jeweilige Wert fuer die Uhr weitergegeben: 
-										// 
-										outbuffer[28] = txbuffer[0];
+										//
+                              outbuffer[27] = HeizungStundencode;
+
+										outbuffer[0] = txbuffer[0];
 										
 										// HeizungStundencode wird an HomeServer weitergegeben
 										
@@ -2961,10 +2970,11 @@ int main (void)
 										EEPROM_Err |= (1<<HEIZUNG);
 										
 									}
+                           
 									
 									// end Objekt 0
 									
-									// Code fuer Objekt 1 lesen: Tag/Nacht-Mode der Heizung
+									// Objekt 1: Code lesen: Tag/Nacht-Mode der Heizung
 									
 									uint8_t tagblock1[buffer_size];
 									uint8_t Stundencode1=0;	
@@ -3031,7 +3041,7 @@ int main (void)
 									
 									// end Objekt 1
 									
-									// Code fuer Objekt 2 lesen: Dachrinnenheizung
+									// Objekt 2: Code lesen fuer Dachrinnenheizung
 									
 									uint8_t tagblock2[buffer_size];
 									uint8_t obj2erfolg=WochentagLesen(EEPROM_WOCHENPLAN_ADRESSE, tagblock2, HEIZUNG, 2, Zeit.wochentag);
@@ -4301,7 +4311,7 @@ int main (void)
 									wdt_reset();
 									//					twi_Call_count0++;
 									twi_Call_count0++;
-									estricherfolg=SlavedatenSchreiben(ESTRICH_ADRESSE,  EstrichTXdaten);
+									estricherfolg=SlavedatenSchreiben(ESTRICH_ADRESSE,  (void*)EstrichTXdaten);
 									
 									wdt_reset();
 									if (estricherfolg)
@@ -4373,7 +4383,7 @@ int main (void)
 									for (i=0 ; i<8; i++) 
 									{
 										//		outbuffer[i]=EstrichRXdaten[i];			// Fuer Test: Daten ab Byte 0 von outbuffer
-										outbuffer[estrich +i]=EstrichRXdaten[i]; // Daten ab Byte 'estrich' von outbuffer Byte 9
+										outbuffer[estrich +i]=EstrichRXdaten[i]; // Daten ab Byte 'estrich' von outbuffer Byte 9. estrich aus enum datenoffset: Wert ist 9
 									}
 									
 									
@@ -4467,12 +4477,12 @@ int main (void)
                         
                         for (int i=44;i<48;i++)
                         {
-                           outbuffer[i]= i;
+                           //outbuffer[i]= i;
                         }
                         
                         for (int i=0;i<8;i++)
                         {
-                           outbuffer[i+36]= EEPROMTXdaten[i];
+                           //outbuffer[i+36]= EEPROMTXdaten[i];
                         }
 
 								//	Warten auf nŠchsten Timerevent
